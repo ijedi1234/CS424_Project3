@@ -12,10 +12,10 @@ const h_FullSize = 790;    //
 const w_Sec1 = 1500;  //Top left section
 const h_Sec1 = 350;
 //const w_Sec2 = 800;  //Right section
-const w_Sec2 = w_FullSize - 350;
+const w_Sec2 = w_FullSize - 400;
 const h_Sec2 = 250;
 
-const w_Sec3 = w_FullSize - 350;
+const w_Sec3 = w_FullSize - 400;
 const h_Sec3 = 250;
 const w_Sec4 = 200;  //Right section
 const h_Sec4 = 250;
@@ -64,6 +64,7 @@ if (x < w_FullSize) {
 //var myButton20 = document.querySelector("#button20");
 var myButton101 = document.querySelector("#button101");
 var myButton102 = document.querySelector("#button102");
+var myButton103 = document.querySelector("#button103");
 //var myButtonClose = document.querySelector("#buttonClose");
 var myDataList = document.querySelector("#dataList");
 var myDataList2 = document.querySelector("#dataList2");
@@ -90,23 +91,34 @@ myButton101.onclick = function () {
 
 myButton102.onclick = function () {
 
-    var sequenceNum = parseInt(prompt('Enter riffle and pool sequence #.'));
-    if (Number.isInteger(sequenceNum) && riverData[curRiverNum].riverAnalyzed) {
-        var riffleAndPool = riverData[curRiverNum].rifflesAndPools[sequenceNum - 1];
+var  xStart = Math.max(xStart_save-lticks_x, 0);
+var  xEnd = Math.min((xStart+lticks_x), riverData[curRiverNum].z_interp.length);
+    console.log("xStart=" + xStart + ", xEnd=" + xEnd)
+  if (xEnd===riverData[curRiverNum].z_interp.length) {
+      xStart = Math.max(xEnd-lticks_x, 0);
+  }
 
-        var xStart = Math.max(riffleAndPool.location - (lticks_x / 2),0), xEnd = Math.min(riffleAndPool.location + (lticks_x / 2), riverData[curRiverNum].z_interp.length);
-        riverSection = ((xStart) + " meters to " + xEnd + " meters");
-        myDataList2.value = riverSection;
+riverSection = ((xStart) + " meters to " + xEnd + " meters");
+myDataList2.value = riverSection;
 
-        drawRiverSection(2, xStart, xEnd);
-        louisDraw(riverData[curRiverNum]);
-        //drawRiver(3, xStart, xEnd);
+drawRiverSection(2, xStart, xEnd);
+louisDraw(riverData[curRiverNum]);
 
-    }
-    else {
+}
 
-        alert("You're supposed to enter a sequence number from the riffle and pool notes list.");
-    }
+
+
+myButton103.onclick = function () {
+
+var xEnd = Math.min((xEnd_save+lticks_x), riverData[curRiverNum].z_interp.length)
+var xStart = Math.max(xEnd-lticks_x, 0);
+    console.log("xStart=" + xStart + ", xEnd=" + xEnd)
+riverSection = ((xStart) + " meters to " + xEnd + " meters");
+myDataList2.value = riverSection;
+
+drawRiverSection(2, xStart, xEnd);
+louisDraw(riverData[curRiverNum]);
+
 
 }
 
@@ -114,8 +126,6 @@ myButton102.onclick = function () {
 
 
 myDataList.onclick = function () {
-    $(".explain_1").empty();  //clear away old notes
-    //var state_name1=myStateList.value;
 
     var newData = myDataList.value;
     var selectionNum = myDataList.selectedIndex;
@@ -127,6 +137,7 @@ myDataList.onclick = function () {
 
         // maintain river section selection list; fill it with data for this list
         list2Empty();
+        secTextUpdate(4, "", "");   // clear header for notes section
 
         var riverSection = "";
         for (var i = 0; i < riverData[curRiverNum].z_interp.length; i += lticks_x) {
@@ -371,206 +382,49 @@ function addDataToList2(inOption) {
 
 
 
-function drawRiver(inSpace, xStart, xEnd) {
-
-    var maxValue = 0, minValue = riverData[curRiverNum].wse_interp[xStart], maxDepth = 0, minDepth = Math.round(riverData[curRiverNum].waterDepth[xStart] * 100) / 100;
-    var lineRec = [], minDepthIndex = 0, maxDepthIndex = 0;
-    var varHeading = "", varDirections = "";
-
-    var margin = { top: 20, right: 20, bottom: 20, left: 30 };
-    var width = w_Sec - margin.right - margin.left;
-    var height = h_Sec - margin.top - margin.bottom;
-
-    lticks = 20;   // breaking the y-scale up into 40 increments
-
-    //xStart_save=xStart, xEnd_save=xEnd;
 
 
-    //console.log("xStart=" + xStart + ", xEnd=" + xEnd);
-
-    var ticks = Math.min(xEnd - xStart, riverData[curRiverNum].z_interp.length);
-    xEnd=ticks;
-
-    for (var i = 0; i < ticks; i++) {
-
-        //console.log("riverData[curRiverNum].wse_interp[i]=" + riverData[curRiverNum].wse_interp[i] + ", riverData[curRiverNum].z_interp[i]" + riverData[curRiverNum].z_interp[i]);
-
-        lineRec.push({ x: 0, y: 0, fill: 0 });
-        lineRec[i].x = parseFloat(riverData[curRiverNum].x_interp[xStart + i]);
-        lineRec[i].y = parseFloat(riverData[curRiverNum].z_interp[xStart + i]);
-        if (riverData[curRiverNum].wse_interp[xStart + i] > maxValue) {
-            maxValue = riverData[curRiverNum].wse_interp[xStart + i];
-        }
-
-        if (riverData[curRiverNum].z_interp[xStart + i] < minValue) {
-            minValue = riverData[curRiverNum].z_interp[xStart + i];
-        }
-
-        if (riverData[curRiverNum].wse_interp[xStart + i] > maxValue) {
-            maxValue = riverData[curRiverNum].wse_interp[xStart + i];
-        }
-
-        if (riverData[curRiverNum].waterDepth[xStart + i] < minDepth) {
-            minDepth = Math.round(riverData[curRiverNum].waterDepth[xStart + i] * 100) / 100;
-            minDepthIndex = xStart + i;
-        }
-
-        if (riverData[curRiverNum].waterDepth[xStart + i] > maxDepth) {
-            maxDepth = Math.round(riverData[curRiverNum].waterDepth[xStart + i] * 100) / 100;
-            maxDepthIndex = xStart + i;
-        }
-
-    }
-
-    var yScalePadding = (maxValue - minValue) / lticks;
-    //minValue=minValue-yScalePadding;
-    minValue = riverData[curRiverNum].minRBE - yScalePadding;
-    //maxValue=maxValue+yScalePadding;
-    maxValue = riverData[curRiverNum].maxWSE + yScalePadding;
-
-
-    for (var i = 0; i < ticks; i++) {
-        lineRec[i].fill = minValue;
-    }
-
-
-    //console.log("minValue, maxValue=" + minValue + ", " + maxValue);
-
-    // make the river bed brown
-    lcolor = "DarkRed";
-    lcolor_saturation = 1;
-    lclass = "line";
-
-    acolor = "DarkRed";
-    acolor_saturation = .5;
-    aclass = "area";
-
-    drawLine(inSpace, lineRec, minValue, maxValue, 1, 1, 10, xStart);
-
-
-    for (var i = 0; i < ticks; i++) {
-        lineRec[i].fill = lineRec[i].y;
-        lineRec[i].y = parseFloat(riverData[curRiverNum].wse_interp[xStart + i]);
-    }
-
-    // and the river water blue
-    lcolor = "steelblue";
-    lcolor_saturation = 1;
-    lclass = "line";
-
-    acolor = "lightsteelblue";
-    acolor_saturation = 1;
-    aclass = "area";
-
-    drawLine(inSpace, lineRec, minValue, maxValue, 0, 2, 10, xStart);
-
-
-    secTextUpdate(inSpace, riverData[curRiverNum].name, "Viewing section " + (xStart + 1) + " to " + xEnd + " meters. Deepest water is " + maxDepth + " meters at " + maxDepthIndex + " meters from starting position. Shallowest water is " + minDepth + " meters at " + minDepthIndex + " meters from the starting position.");
-
-
-    // maintain notes section
-    secTextUpdate(4, "", "");                         // clear header for notes section
-    d3.select("#explain5").selectAll("li").remove();  //clear away old notes
-
-    if (riverData[curRiverNum].riverAnalyzed === 1) {
-
-        for (var i = 0; i < ticks; i++) {
-            //lineRec[i].fill=lineRec[i].y;
-            lineRec[i].y = lineRec[i].fill;  // put the river bed data back in the y fields of the array
-            lineRec[i].fill = 0;
-        }
-
-
-        var xStart, xEnd, k;
-        var rifAndPoNote = "", extrema, extremaName = "";
-
-        for (var i = 0; i < riverData[curRiverNum].rifflesAndPools.length; i++) {
-
-            extrema = riverData[curRiverNum].rifflesAndPools[i];
-
-            if (extrema.Type === extremaPool) {
-                extremaName = "Pool";
-                lcolor = "Green";
-                lcolor_saturation = 1;
-                lclass = "line";
-            }
-            else {
-                extremaName = "Riffle";
-                lcolor = "Red";
-                lcolor_saturation = 1;
-                lclass = "line";
-            }
-
-            rifAndPoNote = (i + 1) + ") " + extremaName + " at " + extrema.location + "m from the starting location, is " + (extrema.lenExtrema) + "m wide, " + extrema.elevation + "m in elevation, and " + extrema.waterDepth + "m below the surface. The len of Entrance is " + extrema.lenEntrance + ", and the length of exit is " + extrema.lenExit + ".";
-
-            console.log("extrema=" + extremaName + ", i=" + i);
-
-            /*var noteObject = {
-             name: extremaName, location: extrema.location, lenExtrema: extrema.lenExtrema, elevation: extrema.elevation, waterDepth: extrema.waterDepth, lenEntrance: extrema.lenEntrance, lenExit: extrema.lenExit
-             };
-             noteObject.name = extremaName;*/
-
-            secNoteSpace(extrema, i, lcolor, lcolor_saturation);
-
-            xStart = parseInt(extrema.location - (extrema.lenEntrance / 2));
-            xEnd = parseInt(extrema.location + (extrema.lenExit / 2));
-
-            console.log("lineRec.length=" + lineRec.length);
-
-            for (var j = xStart; j < (xEnd - 1) ; j++) {
-                lineRec[j].fill = extrema.Type;
-                //console.log("k=" + k + ", lineRec.x=" + lineRec[k].x + ", lineRec.y=" + lineRec[k].y + ", xStart=" + xStart + ", xEnd=" + xEnd );
-            }
-
-            //drawRifflesAndPools(inSpace, lineRec, minValue, maxValue);
-        }
-
-        lcolor = "DarkRed";
-        lcolor_saturation = 1;
-        lclass = "line";
-
-
-        //drawLine(inSpace, lineRec, minValue, maxValue, 0, 0, 10);
-
-        secTextUpdate(4, "Notes for river " + (curRiverNum+1), "We found " + riverData[curRiverNum].rifflesAndPools.length + " riffles and pools");                         // clear header for notes section
-        //secTextUpdate(4, "Notes ", "");                         // clear header for notes section
-    }
-
-}
-
-
-
-function drawRifflesAndPools(inSpace, lineRec, y_min, y_max) {
+function drawRifflesAndPools(inSpace, lineRec, y_min, y_max, rifAndPoColors) {
 
     // Which svg space are we using?
     svgSpace_set(inSpace, lineChart_id);
 
-    var margin = { top: 20, right: 20, bottom: 20, left: 30 };
+    var margin = { top: 20, right: 20, bottom: 40, left: 30 };
     var width = w_Sec - margin.right - margin.left;
     var height = h_Sec - margin.top - margin.bottom;
 
     var svg = svg_line;
-    var tickPadding = 6;
+    var tickPadding = 8;
+
+
 
 
     var line = d3.line()
         .x(function (d) { if (!isNaN(d.x)) { return x(d.x); } })
         .y(function (d) { if (!isNaN(d.x)) { return y(d.y); } });
-    //.x(function(d) { if (!isNaN(d.x)) {console.log("x=" + d.x); return x(d.x);} })
-    //.y(function(d) { if (!isNaN(d.x)) {console.log("y=" + d.y); return y(d.y);} })
-
-
 
     var x = d3.scaleLinear().domain(d3.extent(lineRec, function (d) { return d.x; })).range([0, width]);
 
     var y = d3.scaleLinear().range([height, 0]).domain([y_min, y_max])
 
+
+    svg.append("linearGradient")
+        .attr("id", "temperature-gradient")
+        .attr("gradientUnits", "userSpaceOnUse")
+        .attr("x1", x(lineRec[0].x)).attr("y1", height)
+        .attr("x2", x(lineRec[lineRec.length-1].x)).attr("y2", height)
+        .selectAll("stop")
+        .data(rifAndPoColors)
+        .enter().append("stop")
+        .attr("offset", function(d) { return d.offset; })
+        .attr("stop-color", function(d) { return d.color; });
+
+
     svg.append("path")
         .datum(lineRec)
         .attr("class", lclass)
         .attr("d", line)
-        .attr("transform", "translate(" + (lineRec[0].x - 55) + ",0)")
-        .style("stroke", lcolor)
+        .attr("transform", "translate(" + tickPadding + ",0)")
         .style("opacity", lcolor_saturation);
 
     return 1;
@@ -587,16 +441,15 @@ function drawRiverSection(inSpace, xStart, xEnd) {
     var lineRec = [], minDepthIndex = 0, maxDepthIndex = 0;
     var varHeading = "", varDirections = "";
 
-    var margin = { top: 20, right: 20, bottom: 20, left: 30 };
+    var margin = {top: 20, right: 20, bottom: 20, left: 30};
     var width = w_Sec - margin.right - margin.left;
     var height = h_Sec - margin.top - margin.bottom;
 
-    lticks = 15;   // breaking the y-scale up into 40 increments
+    xStart_save = xStart, xEnd_save = xEnd;
+
+    lticks = 15;   // breaking the y-scale up into ltick increments
 
     var ticks = Math.min(xEnd - xStart, riverData[curRiverNum].z_interp.length);
-    xEnd=ticks;
-
-    xStart_save = xStart, xEnd_save = xEnd;
 
 
     //console.log("xStart=" + xStart + ", xEnd=" + xEnd);
@@ -608,7 +461,7 @@ function drawRiverSection(inSpace, xStart, xEnd) {
 
         //console.log("riverData[curRiverNum].wse_interp[i]=" + riverData[curRiverNum].wse_interp[i] + ", riverData[curRiverNum].z_interp[i]" + riverData[curRiverNum].z_interp[i]);
 
-        lineRec.push({ x: 0, y: 0, fill: 0 });
+        lineRec.push({x: 0, y: 0, fill: 0});
         lineRec[i].x = parseFloat(riverData[curRiverNum].x_interp[xStart + i]);
         lineRec[i].y = parseFloat(riverData[curRiverNum].z_interp[xStart + i]);
         if (riverData[curRiverNum].wse_interp[xStart + i] > maxValue) {
@@ -679,32 +532,125 @@ function drawRiverSection(inSpace, xStart, xEnd) {
     //drawLine(inSpace, lineRec, minValue, maxValue, 0, 2, 0, xStart);
     drawLine(inSpace, lineRec, minValue, maxValue, 0, 1, 10, xStart);
 
-    secTextUpdate(inSpace, riverData[curRiverNum].name, "Viewing section " + (xStart + 1) + " to " + (xStart+xEnd) + " meters. Deepest water is " + maxDepth + " meters at " + maxDepthIndex + " meters from starting position. Shallowest water is " + minDepth + " meters at " + minDepthIndex + " meters from the starting position.");
+    secTextUpdate(inSpace, riverData[curRiverNum].name, "Viewing section " + (xStart) + " to " + (xStart + ticks) + " meters. Deepest water is " + maxDepth + " meters at " + maxDepthIndex + " meters from starting position. Shallowest water is " + minDepth + " meters at " + minDepthIndex + " meters from the starting position.");
 
 
     // maintain notes section
-    secTextUpdate(4, "", "");                         // clear header for notes section
+    //secTextUpdate(4, "", "");                         // clear header for notes section
     d3.select("#explain5").selectAll("li").remove();  //clear away old notes
 
+
+    $(".explain_1").empty();  //clear away old notes
+    //var state_name1=myStateList.value;
+
+
+    // draw riffles and pools
     if (riverData[curRiverNum].riverAnalyzed === 1) {
-        var rifAndPoNote = "", extrema, extremaName = "";
 
-        /*for (var i = 0; i < riverData[curRiverNum].rifflesAndPools.length; i++) {
-         extrema = riverData[curRiverNum].rifflesAndPools[i];
-         extremaName = (extrema.Type === extremaPool) ? "Pool" : "Riffle";
-         rifAndPoNote = (i + 1) + ") " + extremaName + " at " + extrema.location + "m from the starting location, is " + (extrema.lenExtrema) + "m wide, " + extrema.elevation + "m in elevation, and " + extrema.waterDepth + "m below the surface. The len of Entrance is " + extrema.lenEntrance + ", and the length of exit is " + extrema.lenExit + ".";
-         secNoteSpace(rifAndPoNote, i, "DarkRed", .7);
-         }*/
+        for (var i = 0; i < ticks; i++) {
+            //lineRec[i].fill=lineRec[i].y;
+            lineRec[i].y = lineRec[i].fill;  // put the river bed data back in the y field of the array
+            lineRec[i].fill = 0;
+        }
 
-        secTextUpdate(4, "Notes for river " + (curRiverNum+1), "We found " + riverData[curRiverNum].rifflesAndPools.length + " riffles and pools");                         // clear header for notes section
-        //secTextUpdate(4, "Notes ", "");                         // clear header for notes section
 
+        var rifAndPoNote = "", extrema, extremaName = "", RifAndPo1=-1, rifAndPo2=0;
+        var rifAndPoColors = [], j=0, k=0;
+        var jStart = 0, iOffset=0;
+
+
+
+        console.log("Checking xStart=" + xStart + ", xEnd=" + xEnd );
+
+
+        for (var i = 0; i < riverData[curRiverNum].rifflesAndPools.length; i++) {
+            extrema = riverData[curRiverNum].rifflesAndPools[i];
+
+            console.log("RiffleAndPool Data, ExName=" + extrema.name + ", i=" + i + ", extrema.Type=" + extrema.Type + ", extrema.start=" + extrema.start + ", extrema.end=" + extrema.end);
+
+
+            if ( (( xStart >= extrema.start && xStart <= extrema.end) || ( xEnd >= extrema.start && xEnd <= extrema.end)) ||
+                ( ( extrema.start >= xStart && extrema.start <= xEnd) || ( extrema.End >= xStart && extrema.end <= xEnd)) ) {
+
+                console.log("We have a Rillfe or a Pool");
+
+
+                        if (extrema.Type === extremaPool) {
+                            extremaName = "Pool";
+                            lcolor = "Blue";
+                            lcolor_saturation = .4;
+                            lclass = "lineDashedBold";
+                        }
+                        else {
+                            extremaName = "Riffle";
+                            lcolor = "Orange";
+                            lcolor_saturation = .8;
+                            lclass = "lineDashedBold";
+                        }
+
+                        /*
+                         if (k===0){
+                         iOffset = 0;
+                         rifAndPoColors.push({offset: iOffset.toString() + "%", color: (lcolor==="Blue" ? "Yellow" : "Blue")});
+                         }
+                         */
+                        if (extrema.start >= xStart && extrema.start <= xEnd) {
+                            j=extrema.start;
+                        }
+                        else {
+                            j=xStart;
+                        }
+
+                        iOffset = Math.round(((j-xStart) / ticks) * 100);
+                        rifAndPoColors.push({offset: iOffset.toString() + "%", color: lcolor});
+
+
+                        if (extrema.end<xEnd) {
+                            j=extrema.end;
+                        }
+                        else {
+                            j=xEnd;
+                        }
+
+                        iOffset = Math.round(((j-xStart) / ticks) * 100);
+                        rifAndPoColors.push({offset: iOffset.toString() + "%", color: lcolor});
+
+
+
+                        //jStart=Math.min(j+extrema.lenExtrema, ticks);
+                        k = rifAndPoColors.length;
+
+                        //rifAndPoNote = i + ") " + extrema.name + " at " + extrema.location + "m from the starting location, is " + (extrema.lenExtrema) + "m in length, " + extrema.elevation + "m in elevation, and " + extrema.waterDepth + "m below the surface. The len of Entrance is " + extrema.lenEntrance + ", and the length of exit is " + extrema.lenExit + ".";
+
+                        var noteObject = {
+                            name: extrema.name,
+                            location: extrema.location,
+                            lenExtrema: extrema.lenExtrema,
+                            elevation: extrema.elevation,
+                            waterDepth: extrema.waterDepth,
+                            lenEntrance: extrema.lenEntrance,
+                            lenExit: extrema.lenExit
+                        };
+                        secNoteSpace(noteObject, (i+1), "DarkRed", .7);
+                        if (RifAndPo1===-1)
+                            RifAndPo1=(i+1);
+                        RifAndPo2=(i+1);
+
+
+                        //console.log("We have a " + extrema.name + ", i=" + i + ", offset=" + rifAndPoColors[k - 1].offset + ", color" + rifAndPoColors[k - 1].color + ", extrema.Type=" + extrema.Type);
+            }
+        }
+
+
+        //rifAndPoNote = (i + 1) + ") " + extremaName + " at " + extrema.location + "m from the starting location, is " + (extrema.lenExtrema) + "m wide, " + extrema.elevation + "m in elevation, and " + extrema.waterDepth + "m below the surface. The len of Entrance is " + extrema.lenEntrance + ", and the length of exit is " + extrema.lenExit + ".";
+
+        secTextUpdate(4, riverData[curRiverNum].rifflesAndPools.length + " riffles and pools.", "Viewing "+RifAndPo1+ " through " + RifAndPo2 + "." );
+
+        drawRifflesAndPools(inSpace, lineRec, minValue, maxValue, rifAndPoColors);
     }
 
+
 }
-
-
-
 
 
 
@@ -852,9 +798,12 @@ function drawLine(inSpace, lineRec, y_min, y_max, refresh, fillArea, inTicks_x, 
 
 function getNewExtrema() {
     //riffleAndPool={elevation: 0, locRiffle:0, lenRiffleUp:0, lenRiffleDown:0, waterDepthRiffle:0, locPool:0, lenPoolEntrance:0, lenPoolExit:0, waterDepthPool:0};
-    extrema = { elevation: 0, eleRelLastExtrema: 0, waterDepth: 0, location: 0, lenExtrema: 0, lenEntrance: 0, lenExit: 0, Type: -1 };
+    //extrema = { elevation: 0, eleRelLastExtrema: 0, waterDepth: 0, location: 0, start: 0, end: 0, lenExtrema: 0, lenEntrance: 0, lenExit: 0, Type: -1 };
+    extrema = { name: "", elevation: 0, eleRelToLastMeasure: 0, waterDepth: 0, location: 0, start: 0, end: 0, lenExtrema: 0, lenEntrance: 0, lenExit: 0, Type: -100 };
     return extrema;
 }
+
+
 
 
 
@@ -867,16 +816,11 @@ function AnalyzeRiver() {
         return
     }
 
-
     //Refresh Analyzer Window;
     secTextUpdate(4, "", "");                         // clear header
     d3.select("#explain5").selectAll("li").remove();  //clear away old notes
 
-
-    var rifAndPoNote = "", rifAndPoCount = 0, extremaName = "";
-    var extrema = getNewExtrema();
-
-    var SD = 0, T = 0, eDum = 0;
+    var SD = 0, T = 0, eDum = 0, rifAndPoType=-1;
 
     // Calculate T - tolerance value = minimum elevation for new riffle or pool
     for (var i = 0; i < riverData[curRiverNum].e.length; i++) {
@@ -889,9 +833,11 @@ function AnalyzeRiver() {
     //console.log("xBar="+riverData[curRiverNum].xBar + ", SD=" + riverData[curRiverNum].SD)
     //console.log("Analyzing River: " + riverData[curRiverNum].name + ", z_interp.length=" + riverData[curRiverNum].z_interp.length);
 
+    // Initialize
+    var rifAndPoNote = "", rifAndPoCount = 0, extremaName = "";
+    var extrema = getNewExtrema();
 
-    rifAndPoCount = 0;
-
+    // identify the riffles and pools
     for (var i = 0; i < riverData[curRiverNum].e.length; i++) {
         eDum += riverData[curRiverNum].e[i];
 
@@ -899,58 +845,147 @@ function AnalyzeRiver() {
 
             if ((eDum < 0 && extrema.Type === extremaRiffle) ||
                 (eDum > 0 && extrema.Type === extremaPool)) {              // we have a new extrema of the same type, old one was local.
-                extrema.eleRelLastExtrema += eDum;
                 extrema.location = i;
-                extrema.waterDepth = Math.round(riverData[curRiverNum].waterDepth[i] * 1000) / 1000;
-                if (rifAndPoCount > 1) {
-                    riverData[curRiverNum].rifflesAndPools[rifAndPoCount - 2].lenExit = i - riverData[curRiverNum].rifflesAndPools[rifAndPoCount - 2].location;
-                    extrema.lenEntrance = riverData[curRiverNum].rifflesAndPools[rifAndPoCount - 2].lenExit;
-                }
-                else {
-                    extrema.lenEntrance = i;
-                }
+                extrema.eleRelLastExtrema += eDum;
+                //console.log("Adding to "+extrema.name + ", eDum=" + eDum);
 
             }
             else {
-                if (rifAndPoCount > 0) {
-                    // close out old extrema
-                    extrema.lenExit = i - extrema.location;
-                    extrema.lenExtrema = extrema.lenEntrance / 2 + extrema.lenExit / 2;
-                    extrema.eleRelLastExtrema = Math.round(extrema.eleRelLastExtrema * 1000) / 1000;
-                    extrema.elevation = riverData[curRiverNum].z_interp[i];
-                    riverData[curRiverNum].rifflesAndPools.push(extrema);
-                    extremaName = (extrema.Type === extremaPool) ? "Pool" : "Riffle";
 
-                    rifAndPoNote = rifAndPoCount + ") " + extremaName + " at " + extrema.location + "m from the starting location, is " + (extrema.lenExtrema) + "m wide, " + extrema.elevation + "m in elevation, and " + extrema.waterDepth + "m below the surface. The len of Entrance is " + extrema.lenEntrance + ", and the length of exit is " + extrema.lenExit + ".";
-                    console.log(rifAndPoNote);
-                    var noteObject = {
-                        name: extremaName, location: extrema.location, lenExtrema: extrema.lenExtrema, elevation: extrema.elevation, waterDepth: extrema.waterDepth, lenEntrance: extrema.lenEntrance, lenExit: extrema.lenExit
-                    };
-                    secNoteSpace(noteObject, rifAndPoCount, "DarkRed", .7);
+                rifAndPoType= (eDum > 0) ? extremaPool : extremaRiffle;   // type of new landform
 
-                    extrema = getNewExtrema();                            // we have a new extrema of a different kind
+                if (rifAndPoCount===0) {
+
+                    extrema.Type= (rifAndPoType===extremaRiffle) ? extremaPool : extremaRiffle;
+                    extrema.name = (extrema.Type===extremaPool) ? "Pool" : "Riffle";
+                    extrema.location=0;
+                    extrema.elevation = riverData[curRiverNum].z_interp[0];
                 }
 
-                extrema.Type = (eDum > 0) ? extremaPool : extremaRiffle;
-                extrema.eleRelLastExtrema = eDum;
-                extrema.elevation = riverData[curRiverNum].z_interp[i];
+                var OldLandForm=extrema.location;
+                for (var j = OldLandForm; j<i; j++) {
+                    if ((riverData[curRiverNum].e[j] > 0 && rifAndPoType === extremaRiffle) ||          //If our new landform is a riffle (or pool) and we were going down (or up) initially, then move those first measurements to old landform
+                        (riverData[curRiverNum].e[j] < 0 && rifAndPoType === extremaPool)) {
+                        extrema.location++;
+                        eDum-=riverData[curRiverNum].e[j];
+                    }
+                    else {
+                        break;
+                    }
+                }
+                extrema.waterDepth = Math.round(riverData[curRiverNum].waterDepth[extrema.location] * 1000) / 1000;
+                extrema.elevation = Math.round(riverData[curRiverNum].z_interp[extrema.location] * 1000) / 1000;
+
+                // File away the previous landform
+                riverData[curRiverNum].rifflesAndPools.push(extrema);
+                rifAndPoCount=riverData[curRiverNum].rifflesAndPools.length;
+
+
+
+                // Begin processing the new one
+                extrema = getNewExtrema();                            // we have a new extrema of a different kind
+
+                extrema.Type = rifAndPoType;
+                extrema.name = (extrema.Type===extremaPool) ? "Pool" : "Riffle";
                 extrema.location = i;
+                extrema.elevation = riverData[curRiverNum].z_interp[i];
+                //console.log("extrema.name=" + extrema.name + ", i=" + i + ", elevation=" + extrema.elevation)
+                extrema.eleRelToLastMeasure = extrema.elevation-riverData[curRiverNum].rifflesAndPools[rifAndPoCount-1].elevation;
+                //extrema.eleRelToLastMeasure = eDum;
                 extrema.waterDepth = Math.round(riverData[curRiverNum].waterDepth[i] * 1000) / 1000;
-                if (rifAndPoCount > 0) {
-                    extrema.lenEntrance = riverData[curRiverNum].rifflesAndPools[rifAndPoCount - 1].lenExit;
-                }
-                else {
-                    extrema.lenEntrance = i;
-                }
+                extrema.eleRelToLastMeasure = Math.round(extrema.eleRelToLastMeasure * 1000) / 1000;
 
-                rifAndPoCount++;
+
             }
 
-            console.log("eDum=" + eDum + ", rifAndPoCount=" + rifAndPoCount + ", rifflesAndPools.length=" + riverData[curRiverNum].rifflesAndPools.length + ", extrema.lenExtrema=" + extrema.lenExtrema + ", extrema.location=" + extrema.location);
             eDum = 0;
         }
 
     }
+
+    if (extrema.location != 0) {    // we have one more left that needs to be saved
+
+        rifAndPoType= (extrema.eleRelLastExtrema > 0) ? extremaPool : extremaRiffle;   // type of new landform
+
+        if (rifAndPoCount===0) {
+
+            extrema.Type= (rifAndPoType===extremaRiffle) ? extremaPool : extremaRiffle;
+            extrema.name = (extrema.Type===extremaPool) ? "Pool" : "Riffle";
+            extrema.location=0;
+            extrema.elevation = riverData[curRiverNum].z_interp[0];
+        }
+
+        extrema.waterDepth = Math.round(riverData[curRiverNum].waterDepth[extrema.location] * 1000) / 1000;
+        extrema.elevation = Math.round(riverData[curRiverNum].z_interp[extrema.location] * 1000) / 1000;
+
+        // File away
+        riverData[curRiverNum].rifflesAndPools.push(extrema);
+        rifAndPoCount=riverData[curRiverNum].rifflesAndPools.length;
+    }
+
+
+
+        // fine tune the data
+        var i = 0;
+        for (i = 0; i < riverData[curRiverNum].rifflesAndPools.length; i++) {
+
+
+            if (i > 0) {
+                riverData[curRiverNum].rifflesAndPools[i].lenEntrance = riverData[curRiverNum].rifflesAndPools[i].location - riverData[curRiverNum].rifflesAndPools[i - 1].location;
+            }
+            else {
+                riverData[curRiverNum].rifflesAndPools[i].lenEntrance = riverData[curRiverNum].rifflesAndPools[i].location;
+            }
+
+            riverData[curRiverNum].rifflesAndPools[i].start = Math.round(riverData[curRiverNum].rifflesAndPools[i].location - (riverData[curRiverNum].rifflesAndPools[i].lenEntrance / 2));
+
+
+            if (i > 0) {
+                riverData[curRiverNum].rifflesAndPools[i - 1].lenExit = riverData[curRiverNum].rifflesAndPools[i].lenEntrance;
+                riverData[curRiverNum].rifflesAndPools[i - 1].end = Math.round(riverData[curRiverNum].rifflesAndPools[i - 1].location + (riverData[curRiverNum].rifflesAndPools[i - 1].lenExit / 2));
+                riverData[curRiverNum].rifflesAndPools[i - 1].lenExtrema = (riverData[curRiverNum].rifflesAndPools[i - 1].lenEntrance / 2) + (riverData[curRiverNum].rifflesAndPools[i - 1].lenExit / 2);
+
+                extrema = riverData[curRiverNum].rifflesAndPools[i - 1];
+            }
+
+        }
+
+        i=riverData[curRiverNum].rifflesAndPools.length-1;
+        riverData[curRiverNum].rifflesAndPools[i].lenExit = (riverData[curRiverNum].e.length-riverData[curRiverNum].rifflesAndPools[i].location);
+        riverData[curRiverNum].rifflesAndPools[i].end = Math.round(riverData[curRiverNum].rifflesAndPools[i].location + (riverData[curRiverNum].rifflesAndPools[i].lenExit));
+        riverData[curRiverNum].rifflesAndPools[i].lenExtrema = (riverData[curRiverNum].rifflesAndPools[i].lenEntrance / 2) + (riverData[curRiverNum].rifflesAndPools[i].lenExit);
+
+
+
+    // Report
+    for (i = 0; i < riverData[curRiverNum].rifflesAndPools.length; i++) {
+
+
+        extrema = riverData[curRiverNum].rifflesAndPools[i];
+
+
+
+        rifAndPoNote = i + ") " + extrema.name + " at " + extrema.location + "m from the starting location, is " + (extrema.lenExtrema) + "m in length, " + extrema.elevation + "m in elevation, and " + extrema.waterDepth + "m below the surface. The len of Entrance is " + extrema.lenEntrance + ", and the length of exit is " + extrema.lenExit + ".";
+        console.log(rifAndPoNote);
+
+            var noteObject = {
+                name: extrema.name,
+                location: extrema.location,
+                lenExtrema: extrema.lenExtrema,
+                elevation: extrema.elevation,
+                waterDepth: extrema.waterDepth,
+                lenEntrance: extrema.lenEntrance,
+                lenExit: extrema.lenExit
+            };
+            secNoteSpace(noteObject, (i+1), "DarkRed", .7);
+
+
+        //console.log(rifAndPoNote);
+    }
+
+
+    //riverData[curRiverNum].rifflesAndPools.splice(0, 1);  // remove that first element
+
 
     //console.log("Finished Analyzing River: i=" + i);
 
@@ -958,9 +993,12 @@ function AnalyzeRiver() {
     secTextUpdate(4, "Notes for river " + (curRiverNum + 1), "We found " + riverData[curRiverNum].rifflesAndPools.length + " riffles and pools");
     drawRiverSection(2, xStart_save, xEnd_save);
     louisDraw(riverData[curRiverNum]);
-    //drawRiver(3, 0, riverData[curRiverNum].z_interp.length-1);
 
 }
+
+
+
+
 
 
 
@@ -1083,7 +1121,7 @@ function secNoteSpace(inNote, inNoteId, inColor, inColor_saturation) {
     formInfo.append("label").text("xPos:").style("color", "black");
     formInfo.append("label").text(inNote.location).style("color", "green");
     formInfo.append("br");
-    formInfo.append("label").text("Width:").style("color", "black");
+    formInfo.append("label").text("Length:").style("color", "black");
     formInfo.append("label").text(inNote.lenExtrema).style("color", "purple");
     formInfo.append("br");
     formInfo.append("label").text("Elevation:").style("color", "black");
