@@ -454,9 +454,8 @@ function drawRiverSection(inSpace, xStart, xEnd) {
 
     //console.log("xStart=" + xStart + ", xEnd=" + xEnd);
 
-    //var ticks = Math.min(lticks_x, xEnd - xStart)
 
-
+    // Collect information on this section
     for (var i = 0; i < ticks; i++) {
 
         //console.log("riverData[curRiverNum].wse_interp[i]=" + riverData[curRiverNum].wse_interp[i] + ", riverData[curRiverNum].z_interp[i]" + riverData[curRiverNum].z_interp[i]);
@@ -495,6 +494,7 @@ function drawRiverSection(inSpace, xStart, xEnd) {
     maxValue = riverData[curRiverNum].maxWSE + yScalePadding;
 
 
+    // This defines the lower bound of the River Bed fill section
     for (var i = 0; i < ticks; i++) {
         lineRec[i].fill = minValue;
     }
@@ -511,10 +511,12 @@ function drawRiverSection(inSpace, xStart, xEnd) {
     acolor_saturation = .5;
     aclass = "area";
 
-    //drawLine(inSpace, lineRec, minValue, maxValue, 1, 1, 0, xStart);
+    // Draw River Bed
     drawLine(inSpace, lineRec, minValue, maxValue, 1, 1, 10, xStart);
 
 
+
+    // The River Bed is the lower bound of the River Water fill section
     for (var i = 0; i < ticks; i++) {
         lineRec[i].fill = lineRec[i].y;
         lineRec[i].y = parseFloat(riverData[curRiverNum].wse_interp[xStart + i]);
@@ -529,14 +531,13 @@ function drawRiverSection(inSpace, xStart, xEnd) {
     acolor_saturation = 1;
     aclass = "area";
 
-    //drawLine(inSpace, lineRec, minValue, maxValue, 0, 2, 0, xStart);
+    // Draw River Water
     drawLine(inSpace, lineRec, minValue, maxValue, 0, 1, 10, xStart);
 
     secTextUpdate(inSpace, riverData[curRiverNum].name, "Viewing section " + (xStart) + " to " + (xStart + ticks) + " meters. Deepest water is " + maxDepth + " meters at " + maxDepthIndex + " meters from starting position. Shallowest water is " + minDepth + " meters at " + minDepthIndex + " meters from the starting position.");
 
 
     // maintain notes section
-    //secTextUpdate(4, "", "");                         // clear header for notes section
     d3.select("#explain5").selectAll("li").remove();  //clear away old notes
 
 
@@ -588,12 +589,7 @@ function drawRiverSection(inSpace, xStart, xEnd) {
                             lclass = "lineDashedBold";
                         }
 
-                        /*
-                         if (k===0){
-                         iOffset = 0;
-                         rifAndPoColors.push({offset: iOffset.toString() + "%", color: (lcolor==="Blue" ? "Yellow" : "Blue")});
-                         }
-                         */
+
                         if (extrema.start >= xStart && extrema.start <= xEnd) {
                             j=extrema.start;
                         }
@@ -1149,48 +1145,6 @@ function secNoteSpace(inNote, inNoteId, inColor, inColor_saturation) {
 
 }
 
-
-function secNoteSpace_refresh() {
-    //Refresh;
-
-    // I need to work on scaling down the note section!!!
-    w_sec = w_ScaleDown * 240;
-    h_sec = 340;
-
-    var margin = { top: 20, right: 10, bottom: 20, left: 10 };
-    var width = w_Sec - margin.right - margin.left;
-    var height = h_Sec - margin.top - margin.bottom;
-
-
-    secTextUpdate(4, "", "");                         // clear header
-    d3.select("#explain5").selectAll("li").remove();  //clear away old notes
-
-    d3.select("#explain5")
-        .attr('width', width + margin.left + margin.right)
-        .attr('height', height + margin.top + margin.bottom);
-
-
-
-
-
-    if (secNoteSpaceActive === 1) {
-        setCurrentState(0);
-        srec_fill(state_name);
-        secTextUpdate(4, "Notes for " + curYear, "");
-        secNoteSpace("The " + state_name + " incarceration rate was " + incarcerationRate + " per 100,000.  The population was " + population.toLocaleString('en-US') + ". There were " + inmates.toLocaleString('en-US') + " people behind bars.", 60);
-
-
-        for (var i = svg_lineArray.length - 1; i >= 0; i--) {
-            //svg_lineNum=i;
-            setCurrentState(svg_lineArray[i].state_id);
-            srec_fill(state_name);
-            secTextUpdate(4, "Notes for " + curYear, "");
-            secNoteSpace(state_name + "'s incarceration rate was " + incarcerationRate + " per 100,000.  The population was " + population.toLocaleString('en-US') + ". There were " + inmates.toLocaleString('en-US') + " people behind bars.", i);
-
-        }
-
-    }
-}
 
 
 function louisDraw(river) {
