@@ -18,3 +18,5 @@ If you use Python 3 or above, begin the python server through the command "pytho
 Use a usable port number for [port]. 8080 is a good number for this.
 
 Then, go to localhost:[port]. If you used 8080 for the port number, use localhost:8080.
+
+The paper paperShort.pdf in this github repo has more, but brief information on the project.
